@@ -1,7 +1,9 @@
 from app.criteria import CRITERIONS
 from app.root_logger import get_root_logger
 from app.localisation import *
-from app.mongo_odm import CriterionDBManager, TrainingsDBManager
+from app.mongo_odm import (CriterionDBManager, 
+                           TrainingsDBManager, 
+                           AnswerTrainingsDBManager)
 
 logger = get_root_logger()
 
@@ -17,15 +19,21 @@ class BaseCriterionPack:
     def add_criterion_result(self, name, criterion_result):
         self.criteria_results[name] = criterion_result
 
-    def apply(self, audio, presentation, training_id):
+    def apply(self, audio, presentation, training_id, training_type):
         logger.info(
             'Called {}.apply for a training with training_id = {}'.format(self.name, training_id))
+        
+        if training_type == 'answer_training':
+            db_manager = AnswerTrainingsDBManager()
+        elif training_type == 'standart_training':
+            db_manager = TrainingsDBManager()
+
         for criterion in self.criteria:
             try:
                 criterion_result = criterion.apply(
                     audio, presentation, training_id, self.criteria_results)
                 self.add_criterion_result(criterion.name, criterion_result)
-                TrainingsDBManager().add_criterion_result(
+                db_manager.add_criterion_result(
                     training_id, criterion.name, criterion_result)
                 logger.info('Attached {} {} to a training with training_id = {}'
                             .format(criterion.name, criterion_result, training_id))

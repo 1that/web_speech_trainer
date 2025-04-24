@@ -39,7 +39,7 @@ pack_configuration = {
     'QuestionAnsweringPack': [
         ['AnswerDurationCriterion', 0.4],
         ['AnswerSpeechPaceCriterion', 0.3],
-        ['DEFAULT_FILLERS_RATIO_CRITERION', 0.2]
+        ['DEFAULT_FILLERS_RATIO_WITHOUT_SLIDES_CRITERION', 0.2]
     ]
 }
 

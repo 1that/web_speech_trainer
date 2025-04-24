@@ -83,6 +83,24 @@ def get_fillers_number(fillers: list, audio: Audio) -> int:
     return sum(map(len, get_fillers(fillers, audio)))
 
 
+def get_fillers_without_slides(fillers: list, audio: Audio) -> list:
+    found_fillers = []
+    audio_words = [recognized_word.word.value for recognized_word in audio.audio_stats['recognized_words']]
+    for i in range(len(audio_words)):
+        for filler in fillers:
+            filler_split = filler.split()
+            filler_length = len(filler_split)
+            if i + filler_length > len(audio_words):
+                continue
+            if audio_words[i: i + filler_length] == filler_split:
+                found_fillers.append(filler)
+    return found_fillers
+
+
+def get_fillers_number_without_slides(fillers: list, audio: Audio) -> int:
+    return len(get_fillers_without_slides(fillers, audio))
+
+
 DEFAULT_SKIP_SLIDES = [
     "Спасибо за внимание",
 ]

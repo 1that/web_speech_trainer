@@ -10,7 +10,8 @@ from app.utils import SECONDS_PER_MINUTE
 from criteria import (FillersNumberCriterion, FillersRatioCriterion,
                       SpeechIsNotInDatabaseCriterion, SpeechPaceCriterion,
                       StrictSpeechDurationCriterion, ComparisonSpeechSlidesCriterion,
-                      ComparisonWholeSpeechCriterion)
+                      ComparisonWholeSpeechCriterion, SpeechPaceWithoutSlidesCriterion,
+                      FillersRatioWithoutSlidesCriterion)
 
 from .utils import DEFAULT_FILLERS
 from .utils import DEFAULT_SKIP_SLIDES
@@ -59,12 +60,19 @@ preconfigured_criterions = [
         dependent_criteria=[],
     ),
 
-    SpeechPaceCriterion(
+    SpeechPaceWithoutSlidesCriterion(
         name="AnswerSpeechPaceCriterion",
         parameters={
             'minimal_allowed_pace': 80,
             'maximal_allowed_pace': 100,
         },
+        dependent_criteria=[],
+    ),
+
+    # FillersRatioWithoutSlidesCriterion
+    FillersRatioWithoutSlidesCriterion(
+        name='DEFAULT_FILLERS_RATIO_WITHOUT_SLIDES_CRITERION',
+        parameters={'fillers': DEFAULT_FILLERS},
         dependent_criteria=[],
     ),
 
