@@ -65,7 +65,13 @@ class TrainingProcessor:
                 criteria_pack_db = CriterionPackDBManager().get_criterion_pack_by_name(criteria_pack.name)
                 feedback_evaluator_id = training_db.feedback_evaluator_id
                 feedback_evaluator = FeedbackEvaluatorFactory().get_feedback_evaluator(feedback_evaluator_id)(criteria_pack_db.criterion_weights)
-                training = Training(training_id, audio, presentation, criteria_pack, feedback_evaluator)
+                training = Training(
+                    training_id, 
+                    audio, 
+                    presentation, 
+                    criteria_pack, 
+                    feedback_evaluator,
+                    'standart_training')
                 try:
                     feedback = training.evaluate_feedback()
                 except Exception as e:

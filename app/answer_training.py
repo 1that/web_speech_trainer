@@ -1,23 +1,17 @@
-class Training:
+class AnswerTraining:
     def __init__(self, 
                  training_id, 
-                 audio, 
-                 presentation, 
+                 audio,
                  criteria_pack, 
                  feedback_evaluator,
-                 training_type):
+                 presentation = None): 
         self.training_id = training_id
         self.audio = audio
-        self.presentation = presentation
         self.criteria_pack = criteria_pack
         self.feedback_evaluator = feedback_evaluator
-        self.training_type = training_type
+        self.presentation = presentation
 
     def evaluate_feedback(self):
-        criteria_results = self.criteria_pack.apply(
-            self.audio, 
-            self.presentation,
-            self.training_id,
-            self.training_type)
+        criteria_results = self.criteria_pack.apply(self.audio, self.presentation, self.training_id)
         return self.feedback_evaluator.evaluate_feedback(criteria_results)
 

@@ -24,7 +24,7 @@ from app.mongo_models import (AudioToRecognize, Consumers, Criterion, CriterionP
                               RecognizedPresentationsToProcess, Sessions,
                               TaskAttempts, TaskAttemptsToPassBack, Tasks,
                               Trainings, TrainingsToProcess, Questions, AnswerTrainings,
-                              AnswerRecords)
+                              AnswerRecords, AnswerTrainingsToProcess)
 from app.status import (AudioStatus, PassBackStatus, PresentationStatus,
                         TrainingStatus)
 from app.utils import remove_blank_and_none
@@ -633,6 +633,29 @@ class TrainingsToProcessDBManager:
         return obj['training_id']
 
 
+class AnswerTrainingsToProcessDBManager:
+    def __new__(cls):
+        if not hasattr(cls, 'init_done'):
+            cls.instance = super(AnswerTrainingsToProcessDBManager, cls).__new__(cls)
+            connect(Config.c.mongodb.url + Config.c.mongodb.database_name)
+            cls.init_done = True
+        return cls.instance
+
+    def add_training_to_process(self, training_id):
+        return AnswerTrainingsToProcess(
+            training_id=training_id
+        ).save()
+
+    def extract_training_id_to_process(self):
+        obj = AnswerTrainingsToProcess.objects.model._mongometa.collection.find_one_and_delete(
+            filter={},
+            sort=[('_id', pymongo.ASCENDING)]
+        )
+        if obj is None:
+            return None
+        return obj['training_id']
+
+
 class AudioToRecognizeDBManager:
     def __new__(cls):
         if not hasattr(cls, 'init_done'):
@@ -1015,3 +1038,35 @@ class AnswerTrainingsDBManager:
         training = AnswerTrainings.objects.get({'_id': ObjectId(training_id)})
         training.answer_record_ids.append(record_id)
         training.save()
+    
+    def append_verdict(self, training_id, verdict):
+        document = None
+        while document is None:
+            current_training_db = self.get_answer_training(training_id)
+            if current_training_db is None:
+                return False
+            old_verdict = current_training_db.feedback.get('verdict', None)
+            new_verdict = verdict if old_verdict is None else old_verdict + '\n' + verdict
+            document = AnswerTrainings.objects.model._mongometa.collection.find_one_and_update(
+                filter={'_id': ObjectId(training_id), 'feedback.verdict': old_verdict},
+                update={'$set': {'feedback.verdict': new_verdict}},
+                return_document=ReturnDocument.AFTER,
+            )
+        return True
+
+    def set_score(self, training_id, score):
+        training = self.get_answer_training(training_id)
+        if training is None:
+            return None
+        training.feedback['score'] = score
+        return training.save()
+    
+    def add_criterion_result(self, training_id, criterion_name, criterion_result):
+        training_db = self.get_answer_training(training_id)
+        if training_db is None:
+            logger.warning(f'No answer training found with training_id = {training_id}')
+            return False
+        criteria_results = training_db.feedback.get('criteria_results') or {}
+        criteria_results.update({criterion_name: criterion_result.to_json()})
+        training_db.feedback['criteria_results'] = criteria_results
+        return training_db.save()

@@ -263,44 +263,44 @@ def view_answer_statistics(training_id: str):
     if not check_access({'_id': ObjectId(training_id)}):
         return {}, 404
     
-    training_statistics, training_statistics_status_code = get_answer_training_statistics(training_id)
-    criteria_pack_db = CriterionPackDBManager().get_criterion_pack_by_name(training_statistics['criteria_pack_id'])
-    feedback = training_statistics['feedback']
-    feedback_evaluator_id = training_statistics['feedback_evaluator_id']
-    feedback_evaluator = FeedbackEvaluatorFactory().get_feedback_evaluator(feedback_evaluator_id)(criteria_pack_db.criterion_weights)
-    criteria_results = feedback.get('criteria_results', {})
+    # training_statistics, training_statistics_status_code = get_answer_training_statistics(training_id)
+    # criteria_pack_db = CriterionPackDBManager().get_criterion_pack_by_name(training_statistics['criteria_pack_id'])
+    # feedback = training_statistics['feedback']
+    # feedback_evaluator_id = training_statistics['feedback_evaluator_id']
+    # feedback_evaluator = FeedbackEvaluatorFactory().get_feedback_evaluator(feedback_evaluator_id)(criteria_pack_db.criterion_weights)
+    # criteria_results = feedback.get('criteria_results', {})
 
-    if 'score' in feedback:
-        feedback_str = '{} = {}'.format(t("Оценка за тренировку"),'{:.2f}'.format(feedback.get('score')))
-        results_as_sum_str = feedback_evaluator.get_result_as_sum_str(criteria_results)
-        if results_as_sum_str:
-            feedback_str += ' = {}'.format(results_as_sum_str)
-    else:
-        feedback_str = t("Тренировка обрабатывается. Обновите страницу.")
+    # if 'score' in feedback:
+    #     feedback_str = '{} = {}'.format(t("Оценка за тренировку"),'{:.2f}'.format(feedback.get('score')))
+    #     results_as_sum_str = feedback_evaluator.get_result_as_sum_str(criteria_results)
+    #     if results_as_sum_str:
+    #         feedback_str += ' = {}'.format(results_as_sum_str)
+    # else:
+    #     feedback_str = t("Тренировка обрабатывается. Обновите страницу.")
 
-    if 'verdict' in feedback:
-        verdict_str = feedback.get('verdict').replace('\n', '\\n')
-    else:
-        verdict_str = ''
+    # if 'verdict' in feedback:
+    #     verdict_str = feedback.get('verdict').replace('\n', '\\n')
+    # else:
+    #     verdict_str = ''
 
-    questions = QuestionsDBManager().get_question_by_training_id(training_id)
-    questions_list = [{'id': str(q.question_id), 'text': q.question} for q in questions]
+    # questions = QuestionsDBManager().get_question_by_training_id(training_id)
+    # questions_list = [{'id': str(q.question_id), 'text': q.question} for q in questions]
 
-    records = AnswerRecordsDBManager().get_records_by_training_id(training_id)
-    records_list = [
-        {
-            'id': str(record.record_file_id),
-            'duration': record.record_file_duration,
-            'url': f'/api/files/answer-records/{record.record_file_id}'
-        }
-        for record in records
-    ]
+    # records = AnswerRecordsDBManager().get_records_by_training_id(training_id)
+    # records_list = [
+    #     {
+    #         'id': str(record.record_file_id),
+    #         'duration': record.record_file_duration,
+    #         'url': f'/api/files/answer-records/{record.record_file_id}'
+    #     }
+    #     for record in records
+    # ]
 
     return render_template(
         'answer_statistics.html',
         training_id=training_id,
-        questions=questions_list,
-        records=records_list,
-        verdict=verdict_str,
-        feedback=feedback_str
+        # records=records_list,
+        # questions=questions_list,
+        # verdict=verdict_str,
+        # feedback=feedback_str
     ), 200

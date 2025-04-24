@@ -10,6 +10,7 @@ services:
     depends_on:
       - db
       - training_processor
+      - answer_training_processor
     volumes:
       - ../database-dump:/app/dump/database-dump/
 
@@ -52,6 +53,17 @@ services:
   training_processor:
     image: wst-image:v0.2
     command: python3 -m training_processor $APP_CONF
+    restart: always
+    depends_on:
+      - db
+      - recognized_audio_processor
+      - recognized_presentation_processor
+    volumes:
+      - nltk_data:/root/nltk_data
+
+  answer_training_processor:
+    image: wst-image:v0.2
+    command: python3 -m answer_training_processor $APP_CONF
     restart: always
     depends_on:
       - db

@@ -4,7 +4,7 @@ from flask import Blueprint, request, session
 from bson import ObjectId
 from app.mongo_odm import (QuestionsDBManager, AnswerTrainingsDBManager,
                             AnswerRecordsDBManager, DBManager, TaskAttemptsDBManager, 
-                            TasksDBManager)
+                            TasksDBManager, AnswerTrainingsToProcessDBManager)
 from app.lti_session_passback.auth_checkers import check_auth
 from app.check_access import check_access
 from app.utils import check_arguments_are_convertible_to_object_id
@@ -200,3 +200,13 @@ def get_answer_training_statistics(training_id: str) -> (dict, int):
 #     return {
 #         'answer_training_records': answer_training_list
 #     }, 200
+
+@api_answer_trainings.route('/api/testing_processor/<training_id>/', methods=['GET'])
+def get_answer_training(training_id: str) -> (dict, int):
+
+    AnswerTrainingsToProcessDBManager().add_training_to_process(training_id)
+
+    return {
+        'message': 'OK',
+        'added_training_id': training_id
+    }

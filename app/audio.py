@@ -9,13 +9,21 @@ from app.utils import SECONDS_PER_MINUTE
 class Audio:
     def __init__(self,
                  recognized_audio: Optional[RecognizedAudio] = None,
-                 slide_switch_timestamps: Optional[list] = None):
-        if recognized_audio is None or slide_switch_timestamps is None:
+                 slide_switch_timestamps: Optional[list] = None,
+                 training_type: Optional[str] = 'standard'):
+        if recognized_audio is None:
             self.audio_slides = None
             self.audio_stats = None
-        else:
+        elif training_type == 'standard':
+            if slide_switch_timestamps is None:
+                raise ValueError("slide_switch_timestamps must be provided for 'standard' training type.")
             self.audio_slides = self.split_into_slides(recognized_audio, slide_switch_timestamps)
             self.audio_stats = self.calculate_audio_stats(recognized_audio, slide_switch_timestamps)
+        elif training_type == 'answer':
+            self.audio_slides = None
+            self.audio_stats = self.calculate_answer_stats(recognized_audio)
+        else:
+            raise ValueError(f"Unknown training type: {training_type}")
 
     def split_into_slides(self, recognized_audio: RecognizedAudio, slide_switch_timestamps: list) -> list:
         slides = []
@@ -59,6 +67,25 @@ class Audio:
             'duration': duration,
             'total_words': total_words,
             'words_per_minute': words_per_minute,
+        }
+
+    def calculate_answer_stats(self, recognized_audio: RecognizedAudio) -> dict:
+        if not recognized_audio.recognized_words:
+            raise ValueError("recognized_audio.recognized_words is empty or None.")
+
+        total_words = len(recognized_audio.recognized_words)
+        if total_words == 0:
+            duration = 0
+            words_per_minute = 0
+        else:
+            duration = recognized_audio.recognized_words[-1].end_timestamp - recognized_audio.recognized_words[0].begin_timestamp
+            words_per_minute = total_words / duration * SECONDS_PER_MINUTE if duration > 0 else 0
+
+        return {
+            'duration': duration,
+            'total_words': total_words,
+            'words_per_minute': words_per_minute,
+            'recognized_words': recognized_audio.recognized_words,
         }
 
     def __repr__(self) -> str:

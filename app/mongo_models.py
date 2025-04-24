@@ -141,6 +141,10 @@ class TrainingsToProcess(MongoModel):
     training_id = fields.ObjectIdField()
 
 
+class AnswerTrainingsToProcess(MongoModel):
+    training_id = fields.ObjectIdField()
+
+
 class FeedbackEvaluators(MongoModel):
     name = fields.CharField()
     weights = fields.DictField()
@@ -157,6 +161,7 @@ class Logs(MongoModel):
     funcName = fields.CharField()
     lineno = fields.IntegerField()
 
+
 class AnswerTrainings(MongoModel):
     task_attempt_id = fields.ObjectIdField(blank=True)
     username = fields.CharField(blank=True)
@@ -168,10 +173,12 @@ class AnswerTrainings(MongoModel):
     question_ids = fields.ListField(fields.ObjectIdField(), blank=True, default=[])
     answer_record_ids = fields.ListField(fields.ObjectIdField(), blank=True, default=[])
 
+
 class Questions(MongoModel):
     training_id = fields.ObjectIdField()
     question_audio_id = fields.ObjectIdField()
     question = fields.CharField()
+
 
 class AnswerRecords(MongoModel):
     training_id = fields.ObjectIdField()
