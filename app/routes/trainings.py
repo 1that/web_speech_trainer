@@ -15,7 +15,7 @@ from app.criteria_pack import CriteriaPackFactory
 from app.feedback_evaluator import FeedbackEvaluatorFactory
 from app.lti_session_passback.auth_checkers import check_admin, check_auth
 from app.mongo_odm import (CriterionPackDBManager, TasksDBManager, TaskAttemptsDBManager,
-                           QuestionsDBManager, AnswerRecordsDBManager)
+                           AnswerTrainingsDBManager, QuestionsDBManager, AnswerRecordsDBManager)
 from app.status import TrainingStatus, AudioStatus, PresentationStatus
 from app.utils import check_arguments_are_convertible_to_object_id
 
@@ -224,6 +224,36 @@ def view_answer_training_greeting():
     if not user_session:
         return {}, 404
     
+    username = session.get('session_id')
+    task_id = session.get('task_id')
+    task_db = TasksDBManager().get_task(task_id)
+
+    if task_db is None:
+        return {'message': f'No task with id {task_id}'}, 404
+    
+    task_description = task_db.task_description
+    attempt_count = task_db.attempt_count
+    current_task_attempt = TaskAttemptsDBManager().get_current_task_attempt(username, task_id)
+    if current_task_attempt is not None:
+        training_number = len(current_task_attempt.training_scores) + 1
+    else:
+        training_number = 1
+
+    if current_task_attempt is None or training_number > attempt_count:
+        current_task_attempt = TaskAttemptsDBManager().add_task_attempt(
+            username,
+            task_id,
+            user_session.tasks.get(task_id, {}).get('params_for_passback', ''),
+            attempt_count,
+        )
+        training_number = 1
+    
+    task_attempt_count = TaskAttemptsDBManager().get_attempts_count(username, task_id)
+    
+    current_points_sum = \
+        sum([score if score is not None else 0 for score in current_task_attempt.training_scores.values()])
+    session['task_attempt_id'] = str(current_task_attempt.pk)
+
     criteria_pack_id = session.get('criteria_pack_id')
     criteria_pack = CriteriaPackFactory().get_criteria_pack(criteria_pack_id)
     criteria_pack_id = criteria_pack.name
@@ -233,8 +263,14 @@ def view_answer_training_greeting():
 
     return render_template(
         'answer_training_greeting.html',
+        task_id=task_id,
+        task_description=task_description,
+        current_points_sum='{:.2f}'.format(current_points_sum),
+        attempt_number=task_attempt_count,
+        training_number=training_number,
+        attempt_count=attempt_count,
         criteria_pack_id=criteria_pack_id,
-        criteria_pack_description=criteria_pack_description,
+        criteria_pack_description=criteria_pack_description
     ), 200
 
 @routes_trainings.route('/answer_training/<training_id>/', methods=['GET'])
@@ -263,44 +299,47 @@ def view_answer_statistics(training_id: str):
     if not check_access({'_id': ObjectId(training_id)}):
         return {}, 404
     
-    # training_statistics, training_statistics_status_code = get_answer_training_statistics(training_id)
-    # criteria_pack_db = CriterionPackDBManager().get_criterion_pack_by_name(training_statistics['criteria_pack_id'])
-    # feedback = training_statistics['feedback']
-    # feedback_evaluator_id = training_statistics['feedback_evaluator_id']
-    # feedback_evaluator = FeedbackEvaluatorFactory().get_feedback_evaluator(feedback_evaluator_id)(criteria_pack_db.criterion_weights)
-    # criteria_results = feedback.get('criteria_results', {})
+    training_db = AnswerTrainingsDBManager().get_answer_training(training_id)
+    if training_db is None:
+        return {'message': 'Training not found.'}, 404
+    
+    criteria_pack_db = CriterionPackDBManager().get_criterion_pack_by_name(training_db.criteria_pack_id)
+    feedback = training_db.feedback
+    feedback_evaluator_id = training_db.feedback_evaluator_id
+    feedback_evaluator = FeedbackEvaluatorFactory().get_feedback_evaluator(feedback_evaluator_id)(criteria_pack_db.criterion_weights)
+    criteria_results = feedback.get('criteria_results', {})
 
-    # if 'score' in feedback:
-    #     feedback_str = '{} = {}'.format(t("Оценка за тренировку"),'{:.2f}'.format(feedback.get('score')))
-    #     results_as_sum_str = feedback_evaluator.get_result_as_sum_str(criteria_results)
-    #     if results_as_sum_str:
-    #         feedback_str += ' = {}'.format(results_as_sum_str)
-    # else:
-    #     feedback_str = t("Тренировка обрабатывается. Обновите страницу.")
+    if 'score' in feedback:
+        feedback_str = '{} = {:.2f}'.format(t("Оценка за тренировку"), feedback.get('score'))
+        results_as_sum_str = feedback_evaluator.get_result_as_sum_str(criteria_results)
+        if results_as_sum_str:
+            feedback_str += ' = {}'.format(results_as_sum_str)
+    else:
+        feedback_str = t("Тренировка обрабатывается. Обновите страницу.")
 
-    # if 'verdict' in feedback:
-    #     verdict_str = feedback.get('verdict').replace('\n', '\\n')
-    # else:
-    #     verdict_str = ''
+    if 'verdict' in feedback:
+        verdict_str = feedback.get('verdict').replace('\n', '\\n')
+    else:
+        verdict_str = ''
 
-    # questions = QuestionsDBManager().get_question_by_training_id(training_id)
-    # questions_list = [{'id': str(q.question_id), 'text': q.question} for q in questions]
+    questions = QuestionsDBManager().get_question_by_training_id(training_id)
+    questions_list = [{'id': str(q.pk), 'text': q.question} for q in questions]
 
-    # records = AnswerRecordsDBManager().get_records_by_training_id(training_id)
-    # records_list = [
-    #     {
-    #         'id': str(record.record_file_id),
-    #         'duration': record.record_file_duration,
-    #         'url': f'/api/files/answer-records/{record.record_file_id}'
-    #     }
-    #     for record in records
-    # ]
+    records = AnswerRecordsDBManager().get_records_by_training_id(training_id)
+    records_list = [
+        {
+            'id': str(record.record_file_id),
+            'duration': record.record_file_duration,
+            'url': f'/api/files/answer-records/{record.record_file_id}'
+        }
+        for record in records
+    ]
 
     return render_template(
         'answer_statistics.html',
         training_id=training_id,
-        # records=records_list,
-        # questions=questions_list,
-        # verdict=verdict_str,
-        # feedback=feedback_str
+        records=records_list,
+        questions=questions_list,
+        verdict=verdict_str,
+        feedback=feedback_str
     ), 200

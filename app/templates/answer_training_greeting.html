@@ -4,30 +4,17 @@
 {% endblock %}
 {% block content %}
 <div class="base-container">
-    <h3>{{ t("Задание для тренировки") }}</h3>
-    <h3>{{ t("Описание задания") }}</h3>
-    <h3>{{ t("Проходной балл") }}</h3>
-    <h3>{{ t("Номер попытки") }}</h3>
-    <h3>{{ t("Номер тренировки") }}</h3>
-    <h3>{{ t("Сумма баллов за предыдущие тренировки") }}</h3>
-    <caption>{{ t("Набор критериев") }}</caption>
+    <h3>{{ t("Задание для тренировки") }}: {{ task_id }}</h3>
+    <h3>{{ t("Описание задания") }}: {{ task_description }}</h3>
+    <h3>{{ t("Проходной балл") }}: {{ required_points }} / {{ maximal_points}}</h3>
+    <h3>{{ t("Номер попытки") }}: {{ attempt_number }}</h3>
+    <h3>{{ t("Номер тренировки") }}: {{ training_number }} / {{ attempt_count }}</h3>
+    <h3>{{ t("Сумма баллов за предыдущие тренировки") }}: {{ current_points_sum }}</h3>
+    <caption>{{ t("Набор критериев") }}: {{ criteria_pack_id }}</caption>
     <table
         id="criteria-table"
         border=""
     >
-        <tr>
-            <th>{{ t("Критерий") }}</th>
-            <th>{{ t("Описание") }}</th>
-            <th>{{ t("Оценка") }}</th>
-            <th>{{ t("Вес критерия") }}</th>
-        </tr>
-        </tr>
-        <tr>
-            <td>{{ t("Критерий 1") }}</td>
-            <td>{{ t("Описание критерия 1") }}</td>
-            <td>{{ t("Оценка критерия 1") }}</td>
-            <td>{{ t("Вес критерия 1") }}</td>
-        </tr>
     </table>
     <form method=POST id="upload-presentation-form" enctype=multipart/form-data action="{{ url_for('routes_presentations.handle_presentation_upload', from='answer_training_greeting') }}">
         <input id="file-loading" type=file name=presentation onchange="fileLoadingOnChange()">
@@ -37,4 +24,7 @@
 <script 
     src="{{ url_for('static', filename='js/answer_training_greeting.js') }}"
 ></script>
+<script type="text/javascript">
+    setCriteriaPackDescription({{criteria_pack_description|tojson}});
+</script>
 {% endblock %}

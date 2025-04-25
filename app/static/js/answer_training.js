@@ -25,7 +25,8 @@ $(document).ready(function() {
     let nextButton = $('#next-button')
     let retryButton = $('#retry-button')
     let startRecordingButton = $('#start-recording-button')
-    let listenQuestionButton = $('#listen-question-button')
+    let loadingMessage = $('#loading-message')
+    let questionContainer = $('.question-container')
 
     function fetchQuestionsAndTime() {
         const sec = 60
@@ -39,7 +40,10 @@ $(document).ready(function() {
                 questions = data.questions.map(q => q.text)
                 questionsAudio = data.questions.map(q => q.audio_url)
                 questionsTime = data.sec
+                loadingMessage.hide()
+                questionContainer.show()
                 updateQuestion()
+                
             },
             error: function(error) {
                 console.error('Error:', error)
@@ -165,7 +169,6 @@ $(document).ready(function() {
         fd.append("answerRecord", blob)
         fd.append("answerRecordDuration", ((Date.now() - currentTimestamp) / 1000).toString())
         fetch(`/api/answer_training/records/${trainingId}/`, {method: "POST", body: fd})
-        // .then(response => console.log(response))
     }
 
     function finish() {
@@ -173,6 +176,7 @@ $(document).ready(function() {
             console.error("trainingId is not defined.")
             return
         }
+        fetch(`/api/testing_processor/${trainingId}/`, {method: "GET"})
         window.location.href = `/answer_training/statistics/${trainingId}/`
     }
 

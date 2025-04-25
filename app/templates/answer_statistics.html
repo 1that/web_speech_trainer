@@ -7,13 +7,21 @@
 
 {% block content %}
 <div class="base-container">
-    <h3>id тренировки: {{ training_id }}</h3>
+    <h3>ID тренировки: {{ training_id }}</h3>
+
+    <h3>Обратная связь:</h3>
+    <p>{{ feedback }}</p>
+
+    <h3>Вердикт:</h3>
+    <p>{{ verdict }}</p>
+
     <h3>Список вопросов:</h3>
-    <!-- <ul>
+    <ul>
         {% for question in questions %}
         <li>Вопрос ID: {{ question.id }} - {{ question.text }}</li>
         {% endfor %}
-    </ul> -->
+    </ul>
+
     <h3>Список аудиозаписей:</h3>
     <ul>
         {% for record in records %}
@@ -32,23 +40,5 @@
 <script src="{{ url_for('static', filename='js/answer_statistics.js') }}"></script>
 <script type="text/javascript">
     setupTrainingId("{{training_id}}");
-    fetch(`/api/testing_processor/${"{{training_id}}"}/`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json"
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log("Response from API:", data);
-    })
-    .catch(error => {
-        console.error("Error fetching data:", error);
-    });
 </script>
 {% endblock %}

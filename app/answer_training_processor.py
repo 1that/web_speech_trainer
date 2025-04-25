@@ -14,7 +14,7 @@ from app.training import Training
 from app.audio_recognizer import WhisperAudioRecognizer
 from app.root_logger import get_root_logger
 
-logger = get_root_logger(service_name='training_processor')
+logger = get_root_logger(service_name='answer_training_processor')
 
 
 class AnswerTrainingProcessor:
@@ -93,7 +93,7 @@ class AnswerTrainingProcessor:
                 task_attempt_id = training_db.task_attempt_id
                 TaskAttemptsDBManager().update_scores(task_attempt_id, training_id, total_score)
             except Exception as e:
-                logger.error('Unknown exception.\n{}'.format(e))
+                logger.error(f'Unknown exception.\n{e}')
 
 
 if __name__ == "__main__":

@@ -131,32 +131,6 @@ def add_answer_training_record(training_id: str):
 
     return {'message': 'OK'}, 200
 
-# @api_answer_trainings.route('/api/answer_training/<training_id>/questions_and_records', methods=['GET'])
-# def get_questions_and_records(training_id: str):
-#     user_session = check_auth()
-#     if not user_session:
-#         return {'message': 'Unauthorized'}, 401
-    
-#     questions = QuestionsDBManager().get_questions_by_id(training_id)
-#     questions_list = [{'id': str(q.id), 'text': q.question} for q in questions]
-
-#     records = AnswerRecordsDBManager().get_records_by_training_id(training_id)
-#     records_list = [
-#         {
-#             'id': str(record.id),
-#             'file_id': str(record.record_file_id),
-#             'duration': record.record_file_duration
-#         }
-#         for record in records
-#     ]
-
-#     return {
-#         'training_id': training_id,
-#         'questions': questions_list,
-#         'records': records_list,
-#         'message': 'OK'
-#     }, 200
-
 @check_arguments_are_convertible_to_object_id
 @api_answer_trainings.route('/api/answer_training/statistics/<training_id>/', methods=['GET'])
 def get_answer_training_statistics(training_id: str) -> (dict, int):
@@ -183,23 +157,6 @@ def get_answer_training_statistics(training_id: str) -> (dict, int):
         'feedback_evaluator_id': feedback_evaluator_id
     }, 200
 
-# # testing
-# @api_answer_trainings.route('/api/answer_training/all_records', methods=['GET'])
-# def get_answer_trainings():
-#     user_session = check_auth()
-#     if not user_session:
-#         return {'message': 'Unauthorized'}, 401
-
-#     answer_training_records = AnswerRecordsDBManager().get_all_record()
-
-#     answer_training_list = [
-#         {key: str(value) if isinstance(value, ObjectId) else value for key, value in record.to_son().to_dict().items()}
-#         for record in answer_training_records
-#     ]
-
-#     return {
-#         'answer_training_records': answer_training_list
-#     }, 200
 
 @api_answer_trainings.route('/api/testing_processor/<training_id>/', methods=['GET'])
 def get_answer_training(training_id: str) -> (dict, int):

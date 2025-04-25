@@ -976,6 +976,13 @@ class AnswerRecordsDBManager:
             logger.warning(f'Invalid record_id = {record_id}, {e}')
             return None
         
+    def get_records_by_training_id(self, training_id):
+        try:
+            return list(AnswerRecords.objects.raw({'training_id': ObjectId(training_id)}))
+        except Exception as e:
+            logger.warning(f'Error retrieving records for training_id = {training_id}: {e}')
+            return []
+        
     def get_all_record(self):
         try:
             return list(AnswerRecords.objects.all())
