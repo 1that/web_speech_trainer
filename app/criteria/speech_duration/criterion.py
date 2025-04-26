@@ -56,11 +56,27 @@ class SpeechDurationCriterion(BaseCriterion):
 
     def apply(self, audio, presentation, training_id, criteria_results):
         maximal_allowed_duration = self.parameters.get(
-            'maximal_allowed_duration')
+            'maximal_allowed_duration'
+        )
         minimal_allowed_duration = self.parameters.get(
-            'minimal_allowed_duration')
+            'minimal_allowed_duration'
+        )
         duration = audio.audio_stats['duration']
+
+        if minimal_allowed_duration and duration < minimal_allowed_duration:
+            verdict = t(f"Продолжительность речи слишком короткая: {duration:.2f} секунд.\
+                         Минимально допустимая: {minimal_allowed_duration:.2f} секунд.")
+        elif maximal_allowed_duration and duration > maximal_allowed_duration:
+            verdict = t(f"Продолжительность речи слишком длинная: {duration:.2f} секунд.\
+                         Максимально допустимая: {maximal_allowed_duration:.2f} секунд.")
+        else:
+            verdict = t(f"Продолжительность речи в пределах нормы: {duration:.2f} секунд.")
+        
         return CriterionResult(
-            get_proportional_result(
-                duration, minimal_allowed_duration, maximal_allowed_duration)
+            result=get_proportional_result(
+                duration,
+                minimal_allowed_duration,
+                maximal_allowed_duration
+            ),
+            verdict=verdict
         )

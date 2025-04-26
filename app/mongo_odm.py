@@ -1067,13 +1067,50 @@ class AnswerTrainingsDBManager:
             return None
         training.feedback['score'] = score
         return training.save()
+
+    def set_audio_score(self, training_id, audio_id, score):
+        training = self.get_answer_training(training_id)
+        if training is None:
+            logger.warning(f"No answer training found with training_id = {training_id}")
+            return None
+
+        audio_scores = training.feedback.get('audio_scores', {})
+        audio_scores[str(audio_id)] = score
+
+        training.feedback['audio_scores'] = audio_scores
+        return training.save()
     
     def add_criterion_result(self, training_id, criterion_name, criterion_result):
         training_db = self.get_answer_training(training_id)
         if training_db is None:
             logger.warning(f'No answer training found with training_id = {training_id}')
             return False
-        criteria_results = training_db.feedback.get('criteria_results') or {}
-        criteria_results.update({criterion_name: criterion_result.to_json()})
-        training_db.feedback['criteria_results'] = criteria_results
+        
+        audio_criteria_results = training_db.feedback.get('audio_criteria_results', [])
+        
+        added = False
+        for result_group in audio_criteria_results:
+            if criterion_name not in result_group:
+                result_group[criterion_name] = (
+                    criterion_result.to_json() if hasattr(criterion_result, 'to_json') else criterion_result
+                )
+                added = True
+                break
+        
+        if not added:
+            audio_criteria_results.append({
+                criterion_name: (
+                    criterion_result.to_json() if hasattr(criterion_result, 'to_json') else criterion_result
+                )
+            })
+
+        # logger.info(f'Adding criterion result for training_id = {training_id}, criterion_name = {criterion_name}, criterion_result = {criterion_result}')
+        # audio_criteria_results = training_db.feedback.get('audio_criteria_results', [])
+        # logger.info(f'audio_criteria_results = {audio_criteria_results}')
+
+        # audio_criteria_results.append({
+        #     f"{criterion_name}": criterion_result.to_json() if hasattr(criterion_result, 'to_json') else criterion_result
+        # })
+
+        training_db.feedback['audio_criteria_results'] = audio_criteria_results
         return training_db.save()

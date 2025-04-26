@@ -46,7 +46,7 @@ class AnswerTrainingProcessor:
                     if audio_file is None:
                         logger.warning(f'Audio file with record_id = {answer_record_db.record_file_id} not found for training_id = {training_id}.')
                         continue
-                    audio_files.append(audio_file)
+                    audio_files.append((audio_file, answer_record_db.record_file_id))
 
                 audio_recognizer = WhisperAudioRecognizer(url=Config.c.whisper.url)
                 
@@ -58,7 +58,7 @@ class AnswerTrainingProcessor:
                 feedback_evaluator = FeedbackEvaluatorFactory().get_feedback_evaluator(feedback_evaluator_id)(criteria_pack_db.criterion_weights)
 
                 total_score = 0
-                for audio_file in audio_files:
+                for audio_file, record_file_id in audio_files:
                     recognized_audio = audio_recognizer.recognize(audio_file)
 
                     logger.info(f'Successful audio recognized:')
@@ -79,7 +79,9 @@ class AnswerTrainingProcessor:
 
                     try:
                         feedback = training.evaluate_feedback()
+                        logger.info(f'feedback: {feedback}.')
                         logger.info(f'Feedback score for current audio: {feedback.score}.')
+                        AnswerTrainingsDBManager().set_audio_score(training_id, record_file_id, feedback.score)
                         total_score += feedback.score
                     except Exception as e:
                         verdict = f'Feedback evaluation for a training with training_id = {training_id} has failed.\n{e}'

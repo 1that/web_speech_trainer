@@ -9,11 +9,8 @@
 <div class="base-container">
     <h3>ID тренировки: {{ training_id }}</h3>
 
-    <h3>Обратная связь:</h3>
+    <h3>Общая оценка:</h3>
     <p>{{ feedback }}</p>
-
-    <h3>Вердикт:</h3>
-    <p>{{ verdict }}</p>
 
     <h3>Список вопросов:</h3>
     <ul>
@@ -31,6 +28,22 @@
                 <source src="{{ record.url }}" type="audio/mpeg">
                 Ваш браузер не поддерживает элемент <code>audio</code>.
             </audio>
+            <p>Оценка: {{ record.score }}</p>
+            <p>Вердикт:</p>
+            {% if record.verdicts is mapping %}
+            <ul>
+                {% for criterion, details in record.verdicts.items() %}
+                <li>
+                    <strong>{{ criterion }}</strong>: 
+                    <ul>
+                        <li>Вердикт: {{ details.verdict if details.verdict else "Нет вердикта" }}</li>
+                    </ul>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>{{ record.verdicts }}</p>
+            {% endif %}
         </li>
         {% endfor %}
     </ul>

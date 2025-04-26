@@ -303,43 +303,42 @@ def view_answer_statistics(training_id: str):
     if training_db is None:
         return {'message': 'Training not found.'}, 404
     
-    criteria_pack_db = CriterionPackDBManager().get_criterion_pack_by_name(training_db.criteria_pack_id)
     feedback = training_db.feedback
-    feedback_evaluator_id = training_db.feedback_evaluator_id
-    feedback_evaluator = FeedbackEvaluatorFactory().get_feedback_evaluator(feedback_evaluator_id)(criteria_pack_db.criterion_weights)
-    criteria_results = feedback.get('criteria_results', {})
 
     if 'score' in feedback:
         feedback_str = '{} = {:.2f}'.format(t("Оценка за тренировку"), feedback.get('score'))
-        results_as_sum_str = feedback_evaluator.get_result_as_sum_str(criteria_results)
-        if results_as_sum_str:
-            feedback_str += ' = {}'.format(results_as_sum_str)
     else:
         feedback_str = t("Тренировка обрабатывается. Обновите страницу.")
-
-    if 'verdict' in feedback:
-        verdict_str = feedback.get('verdict').replace('\n', '\\n')
-    else:
-        verdict_str = ''
 
     questions = QuestionsDBManager().get_question_by_training_id(training_id)
     questions_list = [{'id': str(q.pk), 'text': q.question} for q in questions]
 
+    audio_criteria_results = feedback.get('audio_criteria_results', [])
+
     records = AnswerRecordsDBManager().get_records_by_training_id(training_id)
-    records_list = [
-        {
+    audio_scores = feedback.get('audio_scores', {})
+    records_list = []
+
+    for record in records:
+        if audio_criteria_results:
+            verdicts = audio_criteria_results.pop(0)
+        else:
+            verdicts = t("Критерии еще обрабатываются.")
+
+        logger.info(verdicts)
+
+        records_list.append({
             'id': str(record.record_file_id),
             'duration': record.record_file_duration,
-            'url': f'/api/files/answer-records/{record.record_file_id}'
-        }
-        for record in records
-    ]
+            'url': f'/api/files/answer-records/{record.record_file_id}',
+            'score': audio_scores.get(str(record.record_file_id), t("Аудиозапись обрабытывается.")),
+            'verdicts': verdicts
+        })
 
     return render_template(
         'answer_statistics.html',
         training_id=training_id,
         records=records_list,
         questions=questions_list,
-        verdict=verdict_str,
         feedback=feedback_str
     ), 200

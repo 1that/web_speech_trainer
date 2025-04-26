@@ -71,7 +71,12 @@ class Audio:
 
     def calculate_answer_stats(self, recognized_audio: RecognizedAudio) -> dict:
         if not recognized_audio.recognized_words:
-            raise ValueError("recognized_audio.recognized_words is empty or None.")
+            return {
+                'duration': 0,
+                'total_words': 0,
+                'words_per_minute': 0,
+                'recognized_words': [],
+            }
 
         total_words = len(recognized_audio.recognized_words)
         if total_words == 0:
