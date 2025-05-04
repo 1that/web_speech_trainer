@@ -1104,13 +1104,5 @@ class AnswerTrainingsDBManager:
                 )
             })
 
-        # logger.info(f'Adding criterion result for training_id = {training_id}, criterion_name = {criterion_name}, criterion_result = {criterion_result}')
-        # audio_criteria_results = training_db.feedback.get('audio_criteria_results', [])
-        # logger.info(f'audio_criteria_results = {audio_criteria_results}')
-
-        # audio_criteria_results.append({
-        #     f"{criterion_name}": criterion_result.to_json() if hasattr(criterion_result, 'to_json') else criterion_result
-        # })
-
         training_db.feedback['audio_criteria_results'] = audio_criteria_results
         return training_db.save()

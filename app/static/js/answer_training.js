@@ -144,11 +144,11 @@ $(document).ready(function() {
         isRecording = false
         isRecordingCompleted = false
         currentQuestionIndex++
-        if (currentQuestionIndex >= questions.length) {
-            finishQuiz()
-        } else {
-            updateQuestion()
-        }
+        // if (currentQuestionIndex >= questions.length) {
+        //     finishQuiz()
+        // } else {
+        updateQuestion()
+        // }
     }
 
     function updateQuestion() {

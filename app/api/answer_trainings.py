@@ -9,7 +9,6 @@ from app.lti_session_passback.auth_checkers import check_auth
 from app.check_access import check_access
 from app.utils import check_arguments_are_convertible_to_object_id
 from app.tts.silero_tts import SileroTTS
-import soundfile as sf
 
 api_answer_trainings = Blueprint('api_answer_trainings', __name__)
 logger = get_root_logger()
