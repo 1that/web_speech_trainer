@@ -36,7 +36,7 @@ class AnswerTrainingProcessor:
 
                 logger.info(f'Processing training with training_id = {training_id}.')
 
-                audio_files = self._get_audio_files(training_db, training_id)
+                audio_files = self._get_audio_files(training_db)
                 
                 criteria_pack_id = training_db.criteria_pack_id
                 criteria_pack = CriteriaPackFactory().get_criteria_pack(criteria_pack_id)

@@ -43,7 +43,6 @@ $(document).ready(function() {
                 loadingMessage.hide()
                 questionContainer.show()
                 updateQuestion()
-                
             },
             error: function(error) {
                 console.error('Error:', error)
@@ -95,6 +94,7 @@ $(document).ready(function() {
 
     function playQuestionAudio() {
         const audioUrl = questionsAudio[currentQuestionIndex]
+        console.log('Audio URL:', audioUrl)
         if (!audioUrl) {
             console.error('Audio URL not found for the current question.')
             return
@@ -144,11 +144,7 @@ $(document).ready(function() {
         isRecording = false
         isRecordingCompleted = false
         currentQuestionIndex++
-        // if (currentQuestionIndex >= questions.length) {
-        //     finishQuiz()
-        // } else {
         updateQuestion()
-        // }
     }
 
     function updateQuestion() {

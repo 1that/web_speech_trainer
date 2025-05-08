@@ -1,28 +1,36 @@
-import torch
-import soundfile as sf
-import io
+import requests
+from requests.exceptions import RequestException
+from app.root_logger import get_root_logger
+
+
+logger = get_root_logger(service_name="silero_tts")
 
 class SileroTTS:
-    def __init__(self, sample_rate=48000, speaker='baya'):
-        self.device = torch.device('cpu')
-        self.sample_rate = sample_rate
-        self.speaker = speaker
-        self.model, self.example_text = torch.hub.load(
-            repo_or_dir='snakers4/silero-models',
-            model='silero_tts',
-            language='ru',
-            speaker='v3_1_ru'
-        )
+    def __init__(self,
+                 url: str,
+                 speaker: str = 'baya'
+                 ):
+        self._url = url
+        self._speaker = speaker
 
-    def generate_audio(self, text):
-        audio_array = self.model.apply_tts(
-            text=text,
-            speaker=self.speaker,
-            sample_rate=self.sample_rate
-        ).numpy()
-
-        audio_buffer = io.BytesIO()
-        sf.write(audio_buffer, audio_array, self.sample_rate, format='WAV')
-        audio_buffer.seek(0)
-
-        return audio_buffer
+    def generate_audio(self, text: str):
+        try:
+            request_params = {
+                'VOICE': self._speaker,
+                'INPUT_TEXT': text,
+            }
+            response = requests.get(
+                url=self._url + '/process',
+                params=request_params
+            )
+            response.raise_for_status()
+            return response.content
+        except RequestException as e:
+            logger.error(f"Error Silero TTS: {e}")
+            raise
+    
+    def clear_audio_cache(self):
+        try:
+            return requests.get(url=self._url + '/clear_cache')
+        except requests.exceptions.RequestException:
+            return None

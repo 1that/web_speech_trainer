@@ -24,7 +24,7 @@ from app.mongo_models import (AudioToRecognize, Consumers, Criterion, CriterionP
                               RecognizedPresentationsToProcess, Sessions,
                               TaskAttempts, TaskAttemptsToPassBack, Tasks,
                               Trainings, TrainingsToProcess, Questions, AnswerTrainings,
-                              AnswerRecords, AnswerTrainingsToProcess)
+                              AnswerRecords, AnswerTrainingsToProcess, QuestionsToProcess)
 from app.status import (AudioStatus, PassBackStatus, PresentationStatus,
                         TrainingStatus)
 from app.utils import remove_blank_and_none
@@ -654,6 +654,29 @@ class AnswerTrainingsToProcessDBManager:
         if obj is None:
             return None
         return obj['training_id']
+    
+
+class QuestionsToProcessDBManager:
+    def __new__(cls):
+        if not hasattr(cls, 'init_done'):
+            cls.instance = super(QuestionsToProcessDBManager, cls).__new__(cls)
+            connect(Config.c.mongodb.url + Config.c.mongodb.database_name)
+            cls.init_done = True
+        return cls.instance
+
+    def add_question_to_process(self, question_id):
+        return QuestionsToProcess(
+            question_id=question_id
+        ).save()
+    
+    def extract_question_id_to_process(self):
+        obj = QuestionsToProcess.objects.model._mongometa.collection.find_one_and_delete(
+            filter={},
+            sort=[('_id', pymongo.ASCENDING)]
+        )
+        if obj is None:
+            return None
+        return obj['question_id']
 
 
 class AudioToRecognizeDBManager:
@@ -910,10 +933,9 @@ class QuestionsDBManager:
             cls.init_done = True
         return cls.instance
     
-    def add_question(self, training_id, question_audio_id, question):
+    def add_question(self, training_id, question):
         new_question = Questions(
             training_id=training_id,
-            question_audio_id=question_audio_id,
             question=question
         )
         new_question.save()
@@ -939,6 +961,21 @@ class QuestionsDBManager:
         
     def get_all_questions(self):
         return Questions.objects.all()
+    
+    def update_question_audio_id(self, question_id, audio_file_id):
+        try:
+            question = self.get_question(question_id)
+            if not question:
+                logger.warning(f"Question with ID {question_id} not found.")
+                return None
+
+            question.question_audio_id = audio_file_id
+            question.save()
+            logger.info(f"Updated question_audio_id for question with ID {question_id} to {audio_file_id}.")
+            return question
+        except Exception as e:
+            logger.error(f"Failed to update question_audio_id for question with ID {question_id}: {e}")
+            return None
     
     def delete_question(self, question_id):
         question = self.get_question(question_id)

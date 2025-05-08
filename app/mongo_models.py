@@ -145,6 +145,10 @@ class AnswerTrainingsToProcess(MongoModel):
     training_id = fields.ObjectIdField()
 
 
+class QuestionsToProcess(MongoModel):
+    question_id = fields.ObjectIdField()
+
+
 class FeedbackEvaluators(MongoModel):
     name = fields.CharField()
     weights = fields.DictField()
@@ -176,7 +180,7 @@ class AnswerTrainings(MongoModel):
 
 class Questions(MongoModel):
     training_id = fields.ObjectIdField()
-    question_audio_id = fields.ObjectIdField()
+    question_audio_id = fields.ObjectIdField(blank=True)
     question = fields.CharField()
 
 

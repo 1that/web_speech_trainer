@@ -67,10 +67,16 @@ services:
     restart: always
     depends_on:
       - db
-      - recognized_audio_processor
-      - recognized_presentation_processor
-    volumes:
-      - nltk_data:/root/nltk_data
+      - whisper
+      - generate_audio_processor
+
+  generate_audio_processor:
+    image: wst-image:v0.2
+    command: python3 -m generate_audio_processor $APP_CONF
+    restart: always
+    depends_on:
+      - db
+      - silero-tts
 
   task_attempt_to_pass_back_processor:
     image: wst-image:v0.2
@@ -97,6 +103,21 @@ services:
     mem_limit: ${WHISPER_MEM_LIMIT:-5g}
     volumes:
       - whisper_models:/root/.cache/whisper
+
+  silero-tts:
+    image: "navatusein/silero-tts-service:2.0.0"
+    environment:
+      NUMBER_OF_THREADS: 4
+      LANGUAGE: ru
+      SAMPLE_RATE: 48000
+    restart: unless-stopped
+    healthcheck:
+      test: curl -is localhost:9898 | head -n 1 | grep 200 || exit 1
+      interval: 2m
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+      start_interval: 15s
 
 volumes:
   whisper_models:

@@ -4,15 +4,16 @@ from flask import Blueprint, request, session
 from bson import ObjectId
 from app.mongo_odm import (QuestionsDBManager, AnswerTrainingsDBManager,
                             AnswerRecordsDBManager, DBManager, TaskAttemptsDBManager, 
-                            TasksDBManager, AnswerTrainingsToProcessDBManager)
+                            TasksDBManager, AnswerTrainingsToProcessDBManager,
+                            QuestionsToProcessDBManager)
 from app.lti_session_passback.auth_checkers import check_auth
 from app.check_access import check_access
 from app.utils import check_arguments_are_convertible_to_object_id
-from app.tts.silero_tts import SileroTTS
+from app.config import Config
 
 api_answer_trainings = Blueprint('api_answer_trainings', __name__)
 logger = get_root_logger()
-tts_engine = SileroTTS()
+
 
 @check_arguments_are_convertible_to_object_id
 @api_answer_trainings.route('/api/answer_trainings/presentations/<presentation_file_id>/', methods=['POST'])
@@ -62,7 +63,11 @@ def get_questions_and_time(training_id: str):
 
     existing_questions = QuestionsDBManager().get_question_by_training_id(training_id)
     if existing_questions:
-        questions_list = [{'text': q.question} for q in existing_questions[:count]]
+        questions_list = [
+            {
+                'text': q.question,
+                'audio_url': f'/api/files/questions-audio/{q.question_audio_id}',
+            } for q in existing_questions[:count]]
         return {
             'questions': questions_list,
             'message': 'OK',
@@ -80,16 +85,14 @@ def get_questions_and_time(training_id: str):
 
     question_ids = []
 
-    for question in new_questions:
-        audio_buffer = tts_engine.generate_audio(question['question'])
-        audio_file_id = DBManager().add_file(audio_buffer, filename=f"{question['question']}.wav")
-
+    for question_data in new_questions:
         question_obj = QuestionsDBManager().add_question(
             training_id=training_id,
-            question_audio_id=audio_file_id,
-            question=question['question']
+            question=question_data['question']
         )
         question_ids.append(question_obj.pk)
+
+        QuestionsToProcessDBManager().add_question_to_process(question_obj.pk)
 
     AnswerTrainingsDBManager.add_question_ids_to_training(training_id, question_ids)
 
