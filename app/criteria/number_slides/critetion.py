@@ -48,7 +48,7 @@ class NumberSlidesCriterion(BaseCriterion):
             }
 
 
-    def apply(self, audio, presentation, training_id, criteria_results):
+    def apply(self, audio, presentation, training_id, criteria_results, question):
         slides_number = len(presentation.slides)
         criteria_min = self.parameters.get('minimal_allowed_slide_number')
         criteria_max = self.parameters.get('maximal_allowed_slide_number')

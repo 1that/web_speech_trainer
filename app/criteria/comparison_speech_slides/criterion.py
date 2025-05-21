@@ -46,7 +46,7 @@ class ComparisonSpeechSlidesCriterion(BaseCriterion):
         return False
 
     def apply(self, audio: Audio, presentation: Presentation, training_id: ObjectId,
-              criteria_results: dict) -> CriterionResult:
+              criteria_results: dict, question: str) -> CriterionResult:
         # Результаты сравнения текстов
         results = {}
 

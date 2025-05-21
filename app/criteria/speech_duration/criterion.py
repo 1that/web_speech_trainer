@@ -54,7 +54,7 @@ class SpeechDurationCriterion(BaseCriterion):
             }
 
 
-    def apply(self, audio, presentation, training_id, criteria_results, question=None):
+    def apply(self, audio, presentation, training_id, criteria_results, question):
         maximal_allowed_duration = self.parameters.get(
             'maximal_allowed_duration'
         )

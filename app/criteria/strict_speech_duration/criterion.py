@@ -79,7 +79,7 @@ class StrictSpeechDurationCriterion(BaseCriterion):
             }
 
 
-    def apply(self, audio, presentation, training_id, criteria_results):
+    def apply(self, audio, presentation, training_id, criteria_results, question):
         minimal_allowed_duration = self.parameters.get(
             'minimal_allowed_duration')
         maximal_allowed_duration = self.parameters.get(

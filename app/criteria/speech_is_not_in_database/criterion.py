@@ -95,7 +95,7 @@ class SpeechIsNotInDatabaseCriterion(BaseCriterion):
             }
 
 
-    def apply(self, audio, presentation, training_id, criteria_results):
+    def apply(self, audio, presentation, training_id, criteria_results, question):
         current_audio_id = TrainingsDBManager().get__raining(
             training_id).presentation_record_file_id
         current_audio_file = DBManager().get_file(current_audio_id)

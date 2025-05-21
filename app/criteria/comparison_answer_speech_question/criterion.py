@@ -34,19 +34,14 @@ class ComparisonAnswerSpeechQuestionCriterion(BaseCriterion):
 
     def apply(self, audio: Audio, presentation: Presentation, training_id: ObjectId,
               criteria_results: dict, question: str) -> CriterionResult:
-       
-        print(audio.audio_stats)
-
+        
         recognized_words = audio.audio_stats['recognized_words']
         user_speech = []
 
         for w in recognized_words:
-            print(w.word.value.strip())
             user_speech.append(w.word.value.strip())
 
         user_speech = " ".join(normalize_text(user_speech))
-
-        print(question)
 
         question_text = question if question is not None else ""
         question_text = " ".join(normalize_text(question_text.split()))

@@ -51,7 +51,7 @@ class SlidesCheckerCriterion(BaseCriterion):
             }
 
 
-    def apply(self, audio, presentation, training_id, criteria_results):
+    def apply(self, audio, presentation, training_id, criteria_results, question):
         training = TrainingsDBManager().get_training(training_id)
         if not training:
             return CriterionResult(0, t('Тренировка отсутствует в БД'))

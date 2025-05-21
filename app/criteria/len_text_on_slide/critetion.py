@@ -30,7 +30,7 @@ class LenTextOnSlideCriterion(BaseCriterion):
         'Оценка':t('1, если выполнен, иначе пропорционально количеству слайдов, удовлетворяющих критерию (с количеством слов, большим {})').format(self.parameters['minimal_number_words'])
         } 
 
-    def apply(self, audio, presentation, training_id, criteria_results):
+    def apply(self, audio, presentation, training_id, criteria_results, question):
         slides_number = len(presentation.slides)
         criteria_count = self.parameters['minimal_number_words']
         bad_slides_number = 0

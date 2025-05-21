@@ -47,7 +47,7 @@ class ComparisonWholeSpeechCriterion(BaseCriterion):
         }
 
     def apply(self, audio: Audio, presentation: Presentation, training_id: ObjectId,
-              criteria_results: dict) -> CriterionResult:
+              criteria_results: dict, question: str) -> CriterionResult:
         normalized_speech = []
         normalized_slides = []
 
