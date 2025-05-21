@@ -19,7 +19,7 @@ class BaseCriterionPack:
     def add_criterion_result(self, name, criterion_result):
         self.criteria_results[name] = criterion_result
 
-    def apply(self, audio, presentation, training_id, training_type):
+    def apply(self, audio, presentation, training_id, training_type, question):
         logger.info(
             'Called {}.apply for a training with training_id = {}'.format(self.name, training_id))
         
@@ -31,7 +31,7 @@ class BaseCriterionPack:
         for criterion in self.criteria:
             try:
                 criterion_result = criterion.apply(
-                    audio, presentation, training_id, self.criteria_results)
+                    audio, presentation, training_id, self.criteria_results, question)
                 self.add_criterion_result(criterion.name, criterion_result)
                 db_manager.add_criterion_result(
                     training_id, criterion.name, criterion_result)

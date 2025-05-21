@@ -37,9 +37,10 @@ pack_configuration = {
     [['ComparisonSpeechSlidesCriterion', 0.5],
      ['ComparisonWholeSpeechCriterion', 0.5]],
     'QuestionAnsweringPack': [
-        ['AnswerDurationCriterion', 0.4],
+        ['AnswerDurationCriterion', 0.3],
         ['AnswerSpeechPaceCriterion', 0.3],
-        ['DEFAULT_FILLERS_RATIO_WITHOUT_SLIDES_CRITERION', 0.2]
+        ['DEFAULT_FILLERS_RATIO_WITHOUT_SLIDES_CRITERION', 0.2],
+        ['ComparisonAnswerSpeechQuestionCriterion', 0.2]
     ]
 }
 

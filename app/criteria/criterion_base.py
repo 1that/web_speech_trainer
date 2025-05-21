@@ -17,8 +17,13 @@ class BaseCriterion:
     def description(self) -> str:
         raise NotImplementedError()
 
-    def apply(self, audio: Audio, presentation: Presentation, training_id: ObjectId, criteria_results: dict) \
-            -> CriterionResult:
+    def apply(self,
+              audio: Audio, 
+              presentation: Presentation, 
+              training_id: ObjectId, 
+              criteria_results: dict,
+              question: str = None
+              ) -> CriterionResult:
         raise NotImplementedError()
 
     @property

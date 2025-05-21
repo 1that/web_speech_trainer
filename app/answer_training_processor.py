@@ -9,6 +9,7 @@ from app.mongo_odm import (CriterionPackDBManager, DBManager,
                            AnswerTrainingsToProcessDBManager, 
                            AnswerTrainingsDBManager, 
                            AnswerRecordsDBManager,
+                           QuestionsDBManager,
                            TaskAttemptsDBManager)
 from app.training import Training
 from app.audio_recognizer import WhisperAudioRecognizer
@@ -37,6 +38,7 @@ class AnswerTrainingProcessor:
                 logger.info(f'Processing training with training_id = {training_id}.')
 
                 audio_files = self._get_audio_files(training_db)
+                questions = self._get_question(training_db)
                 
                 criteria_pack_id = training_db.criteria_pack_id
                 criteria_pack = CriteriaPackFactory().get_criteria_pack(criteria_pack_id)
@@ -45,7 +47,7 @@ class AnswerTrainingProcessor:
                 feedback_evaluator_id = training_db.feedback_evaluator_id
                 feedback_evaluator = FeedbackEvaluatorFactory().get_feedback_evaluator(feedback_evaluator_id)(criteria_pack_db.criterion_weights)
 
-                total_score = self._process_audio_files(audio_files, training_id, criteria_pack, feedback_evaluator)
+                total_score = self._process_audio_files(audio_files, questions, training_id, criteria_pack, feedback_evaluator)
 
                 logger.info(f'Total feedback score: {total_score}.')
                 AnswerTrainingsDBManager().set_score(training_id, total_score)
@@ -76,12 +78,29 @@ class AnswerTrainingProcessor:
 
         return audio_files
     
+    def _get_question(self, training_db):
+        questions = []
+        question_ids = training_db.question_ids
 
-    def _process_audio_files(self, audio_files, training_id, criteria_pack, feedback_evaluator):
+        for question_id in question_ids:
+            question_db = QuestionsDBManager().get_question(question_id)
+            if question_db is None:
+                logger.warning(f'Question with ID {question_id} not found.')
+                continue
+            questions.append(question_db.question)
+
+        return questions
+
+    def _process_audio_files(self, 
+                             audio_files, 
+                             questions, 
+                             training_id, 
+                             criteria_pack, 
+                             feedback_evaluator):
         total_score = 0
         audio_recognizer = WhisperAudioRecognizer(url=Config.c.whisper.url)
 
-        for audio_file, record_file_id in audio_files:
+        for idx, (audio_file, record_file_id) in enumerate(audio_files):
             recognized_audio = audio_recognizer.recognize(audio_file)
             logger.info(f'Successful audio recognized.')
 
@@ -90,6 +109,8 @@ class AnswerTrainingProcessor:
                 training_type='answer'
             )
 
+            question = questions[idx]
+
             training = Training(
                 training_id=training_id,
                 audio=audio,
@@ -97,6 +118,7 @@ class AnswerTrainingProcessor:
                 criteria_pack=criteria_pack,
                 feedback_evaluator=feedback_evaluator,
                 training_type='answer_training',
+                question=question
             )
 
             try:
@@ -116,6 +138,10 @@ class AnswerTrainingProcessor:
 
 
 if __name__ == "__main__":
+    import nltk
+    nltk.download('stopwords')
+    nltk.download('punkt')
+
     Config.init_config(sys.argv[1])
     answer_training_processor = AnswerTrainingProcessor()
     answer_training_processor.run()

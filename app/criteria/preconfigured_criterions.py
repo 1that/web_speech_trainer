@@ -11,7 +11,7 @@ from criteria import (FillersNumberCriterion, FillersRatioCriterion,
                       SpeechIsNotInDatabaseCriterion, SpeechPaceCriterion,
                       StrictSpeechDurationCriterion, ComparisonSpeechSlidesCriterion,
                       ComparisonWholeSpeechCriterion, SpeechPaceWithoutSlidesCriterion,
-                      FillersRatioWithoutSlidesCriterion)
+                      FillersRatioWithoutSlidesCriterion, ComparisonAnswerSpeechQuestionCriterion)
 
 from .utils import DEFAULT_FILLERS
 from .utils import DEFAULT_SKIP_SLIDES
@@ -189,8 +189,13 @@ preconfigured_criterions = [
             "dm": 0
         },
         dependent_criteria=[],
-    )
+    ),
 
+    ComparisonAnswerSpeechQuestionCriterion(
+        name="ComparisonAnswerSpeechQuestionCriterion",
+        parameters={"answer_question_threshold": 0.125},
+        dependent_criteria=[],
+    )
 ]
 
 

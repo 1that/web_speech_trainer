@@ -12,3 +12,4 @@ from .speech_pace.criterion import SpeechPaceCriterion
 from .strict_speech_duration.criterion import StrictSpeechDurationCriterion
 from .comparison_speech_slides.criterion import ComparisonSpeechSlidesCriterion
 from .comparison_whole_speech.criterion import ComparisonWholeSpeechCriterion
+from .comparison_answer_speech_question.criterion import ComparisonAnswerSpeechQuestionCriterion

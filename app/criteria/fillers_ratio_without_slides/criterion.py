@@ -30,7 +30,7 @@ class FillersRatioWithoutSlidesCriterion(BaseCriterion):
         } 
 
 
-    def apply(self, audio, presentation, training_id, criteria_results):
+    def apply(self, audio, presentation, training_id, criteria_results, question):
         total_words = audio.audio_stats['total_words']
         if total_words == 0:
             return CriterionResult(1)

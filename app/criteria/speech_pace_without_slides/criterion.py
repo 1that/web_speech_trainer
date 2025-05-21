@@ -35,7 +35,7 @@ class SpeechPaceWithoutSlidesCriterion(BaseCriterion):
                 "Оценка": t(f"оценка: 1, если выполнен, (p / {self.parameters['minimal_allowed_pace']}), если темп p слишком медленный, ({self.parameters['maximal_allowed_pace']} / p), если темп p слишком быстрый")
             }
 
-    def apply(self, audio: Audio, presentation: Presentation, training_id: ObjectId, criteria_results: dict) \
+    def apply(self, audio: Audio, presentation: Presentation, training_id: ObjectId, criteria_results: dict, question: str) \
             -> CriterionResult:
         minimal_allowed_pace = self.parameters['minimal_allowed_pace']
         maximal_allowed_pace = self.parameters['maximal_allowed_pace']

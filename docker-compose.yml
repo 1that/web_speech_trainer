@@ -110,14 +110,7 @@ services:
       NUMBER_OF_THREADS: 4
       LANGUAGE: ru
       SAMPLE_RATE: 48000
-    restart: unless-stopped
-    healthcheck:
-      test: curl -is localhost:9898 | head -n 1 | grep 200 || exit 1
-      interval: 2m
-      timeout: 5s
-      retries: 3
-      start_period: 45s
-      start_interval: 15s
+    restart: always
 
 volumes:
   whisper_models:
