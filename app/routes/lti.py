@@ -63,4 +63,10 @@ def lti():
 
     TasksDBManager().add_task_if_absent(task_id, task_description, attempt_count, required_points, criteria_pack_id, presentation_id)
 
-    return redirect(url_for('routes_trainings.view_training_greeting'))
+    match task_id:
+        case 'answer_question_trainer_task':
+            return redirect(url_for('routes_trainings.view_answer_training_greeting'))
+        case 'speech_trainer_task':
+            return redirect(url_for('routes_trainings.view_training_greeting'))
+        case _:
+            return redirect(url_for('routes_trainings.view_training_greeting'))
