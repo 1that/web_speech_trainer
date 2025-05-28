@@ -9,7 +9,7 @@ from ..criterion_result import CriterionResult
 from ..utils import get_proportional_result
 
 
-class SpeechPaceWithoutSlidesCriterion(BaseCriterion):
+class SpeechPaceInAnswerCriterion(BaseCriterion):
 
     PARAMETERS = dict(
         minimal_allowed_pace=int.__name__,

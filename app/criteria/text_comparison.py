@@ -3,7 +3,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 
 
-class SlidesSimilarityEvaluator:
+class SimilarityEvaluator:
     def __init__(self):
         self.vectorizer = TfidfVectorizer(ngram_range=(1, 1))
 

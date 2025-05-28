@@ -7,7 +7,7 @@ from ..criterion_result import CriterionResult
 from app.audio import Audio
 from app.presentation import Presentation
 from app.utils import normalize_text, delete_punctuation
-from ..text_comparison import SlidesSimilarityEvaluator
+from ..text_comparison import SimilarityEvaluator
 
 logger = get_root_logger('web')
 
@@ -24,7 +24,7 @@ class ComparisonSpeechSlidesCriterion(BaseCriterion):
             parameters=parameters,
             dependent_criteria=dependent_criteria,
         )
-        self.evaluator = SlidesSimilarityEvaluator()
+        self.evaluator = SimilarityEvaluator()
         if 'slide_speech_threshold' not in self.parameters:
             self.parameters['slide_speech_threshold'] = 0.125
 
