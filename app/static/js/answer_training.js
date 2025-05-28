@@ -28,7 +28,11 @@ $(document).ready(function() {
     let loadingMessage = $('#loading-message')
     let questionContainer = $('.question-container')
 
-    function fetchQuestionsAndTime() {
+    function AudioUrlsReady() {
+        return questionsAudio.every(url => url && !url.endsWith('/None'));
+    }
+
+    function fetchQuestionsAndTime(retry = false) {
         const sec = 60
         const count = 5
 
@@ -43,9 +47,19 @@ $(document).ready(function() {
                 loadingMessage.hide()
                 questionContainer.show()
                 updateQuestion()
+                
+                if (!AudioUrlsReady()) {
+                    retryButton.attr('disabled', 'true')
+                    setTimeout(() => fetchQuestionsAndTime(true), 2000)
+                } else {
+                    retryButton.removeAttr('disabled')
+                }
             },
             error: function(error) {
                 console.error('Error:', error)
+                if (retry) {
+                    setTimeout(() => fetchQuestionsAndTime(true), 2000)
+                }
             }
         })
     }
@@ -94,7 +108,6 @@ $(document).ready(function() {
 
     function playQuestionAudio() {
         const audioUrl = questionsAudio[currentQuestionIndex]
-        console.log('Audio URL:', audioUrl)
         if (!audioUrl) {
             console.error('Audio URL not found for the current question.')
             return
